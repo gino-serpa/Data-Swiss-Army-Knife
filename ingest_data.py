@@ -230,20 +230,31 @@ def get_english_author_keywords(keyword_string):
     english_author_keywords = keyword_string.split('; ')
     return english_author_keywords
 
-def get_addresses(addresses_string):
-    # Break the string by the [ to break into groups
-    # The first element is blank
-    alpha=addresses_string.split('[')[1:]
-
+def get_addresses(alpha):
+    if alpha!=alpha:
+        return {}
+    # Define an empty dict that will have the info we need
     addresses = {}
-    # Now for each element brak by the closing bracket
-    groups = [item.split(']') for item in alpha]
 
+    # Break by the leading '[' of each author group
+    alpha = alpha.split('[')[1:]
+
+    # Each group now is divided in authors and an institution
+    groups = [ item.split(']') for item in alpha]
+
+    # Clean up each group and assign info to dict
+    for pair in groups:
+        (people, place) = pair
+        place = place.strip('; ')
+        people = people.split('; ')
+        for author in people:
+            addresses[author]=place
     return addresses
 
 def get_scielo_dicts(df):
     authors = {}
     papers  = {}
+    institutions = {}
     for idx,row in df.iterrows():
         id            = row['accession number']
         title         = row['title']
@@ -257,6 +268,9 @@ def get_scielo_dicts(df):
         authors_list = row['authors'].split('; ')
         year = int(row['pub year'])
         addresses = get_addresses(row['addresses'])
+        institution_list = list(set(list(addresses.values())))
+
+        # Take care of papers dict
         papers[id] = {
                'title':title,
                'authors': authors_list,
@@ -266,14 +280,28 @@ def get_scielo_dicts(df):
                'othe language title': other_language_title,
                'source': source,
                'language': language,
-               'english author keywords':english_author_keywords
+               'english author keywords':english_author_keywords,
+               'institutions':institution_list
                     }
 
         # Take care of the authors dict
         for author in authors_list:
             if author not in authors:
                 authors[author] = {'papers_list':[id]}
+                authors[author]['institutions']  = []
             else:
                 authors[author]['papers_list'].append(id)
+        for author in addresses:
+            institution = addresses[author]
+            if institution not in authors[author]['institutions']:
+                authors[author]['institutions'].append(institution)
 
-    return authors, papers
+        # Take care of institutions
+        for institution in institution_list:
+            if institution not in institutions:
+                institutions[institution]=\
+                    {'papers':[id]}
+            else:
+                institutions[institution]['papers'].append(id)
+
+    return authors, papers, institutions
