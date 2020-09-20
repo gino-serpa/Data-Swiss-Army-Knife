@@ -223,3 +223,57 @@ def ingest_wos_scielo_file(file_name):
          'DA': 'report date'}
     df=df.rename(columns, axis=1)
     return df
+
+def get_english_author_keywords(keyword_string):
+    if keyword_string!=keyword_string:
+        return []
+    english_author_keywords = keyword_string.split('; ')
+    return english_author_keywords
+
+def get_addresses(addresses_string):
+    # Break the string by the [ to break into groups
+    # The first element is blank
+    alpha=addresses_string.split('[')[1:]
+
+    addresses = {}
+    # Now for each element brak by the closing bracket
+    groups = [item.split(']') for item in alpha]
+
+    return addresses
+
+def get_scielo_dicts(df):
+    authors = {}
+    papers  = {}
+    for idx,row in df.iterrows():
+        id            = row['accession number']
+        title         = row['title']
+        spanish_title = row['spanish title']
+        portuguese_title = row['portuguese title']
+        other_language_title = row['other language title']
+        source = row['source']
+        language = row['language']
+        english_author_keywords = \
+                get_english_author_keywords(row['english author keywords'])
+        authors_list = row['authors'].split('; ')
+        year = int(row['pub year'])
+        addresses = get_addresses(row['addresses'])
+        papers[id] = {
+               'title':title,
+               'authors': authors_list,
+               'year': year,
+               'spanish title': spanish_title,
+               'portuguese title': portuguese_title,
+               'othe language title': other_language_title,
+               'source': source,
+               'language': language,
+               'english author keywords':english_author_keywords
+                    }
+
+        # Take care of the authors dict
+        for author in authors_list:
+            if author not in authors:
+                authors[author] = {'papers_list':[id]}
+            else:
+                authors[author]['papers_list'].append(id)
+
+    return authors, papers
