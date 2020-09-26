@@ -1,4 +1,5 @@
 import pandas as pd
+import chardet
 
 def scielo_wos_info():
     info_string ='''
@@ -168,12 +169,14 @@ def scielo_wos_info():
     return
 
 def ingest_wos_scielo_file(file_name):
-    # (tdl) Before wqhat follows we should have chardet to avoid format problems
-    # import chardet
-    # rawdata = open ('data/savedrecs.txt',"rb").read()
-    # chardet.detect(rawdata) <- Inspect this dict
 
-    df = pd.read_csv(file_name,index_col=False, sep='\t')
+    rawdata = open (file_name,"rb").read()
+    encoding = chardet.detect(rawdata)['encoding']
+
+    df = pd.read_csv(file_name,
+                     encoding=encoding,
+                     index_col=False,
+                     sep='\t')
     columns={'PT':'publication type',
          'AU': 'authors',
          'BE': 'editors',
