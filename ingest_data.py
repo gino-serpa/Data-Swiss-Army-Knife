@@ -1,6 +1,42 @@
 import pandas as pd
 import chardet
 
+countries ={'Argentina': ['Argentina'],
+            'Australia': ['Australia'],
+            'Brazil':    ['Brazil','Brasil'],
+            'Canada':    ['Canada'],
+            'China':     ['China'],
+            'Croatia':   ['Croatia'],
+            'Cuba':      ['Cuba'],
+            'Chile':     ['Chile'],
+            'Colombia':  ['Colombia'],
+            'Denmark':   ['Denmark'],
+            'Ecuador':   ['Ecuador'],
+            'Germany':   ['Germany'],
+            'Indonesia': ['Indonesia'],
+            'India':     ['India'],
+            'Iran':      ['Iran'],
+            'Italy':     ['Italy'],
+            'Mexico':    ['Mexico', 'México'],
+            'Netherlands':['Netherlands', 'Holanda'],
+            'Paraguay':  ['Paraguay'],
+            'Peru':      ['Peru', 'Perú'],
+            'Poland':    ['Poland'],
+            'Portugal':  ['Portugal'],
+            'Serbia':    ['Serbia'],
+            'Spain':     ['Spain','España'],
+            'Ukraine':   ['Ukraine'],
+            'Uruguay':   ['Uruguay'],
+            'USA':       ['USA']}
+
+def verify_country(country):
+    for canonical_name in countries:
+        for alias in countries[canonical_name]:
+            if alias==country:
+                return canonical_name
+    print(country, ' not in datbase' )
+    return 'bad country'
+
 def scielo_wos_info():
     info_string ='''
     https://images.webofknowledge.com/images/help/WOK/hs_selo_fieldtags.html
@@ -266,6 +302,7 @@ def get_scielo_dicts(df):
     authors = {}
     papers  = {}
     institutions = {}
+    counter = 0
     for idx,row in df.iterrows():
         id            = row['accession number']
         title         = row['title']
@@ -310,9 +347,12 @@ def get_scielo_dicts(df):
         # Take care of institutions
         for institution in institution_list:
             if institution not in institutions:
+                country = institution.split(' ')[-1].strip(' ')
+                country=verify_country(country)
                 institutions[institution]=\
-                    {'papers':[id]}
+                    {'papers':[id],
+                    'country':country}
             else:
                 institutions[institution]['papers'].append(id)
-
+    print(counter)
     return authors, papers, institutions
