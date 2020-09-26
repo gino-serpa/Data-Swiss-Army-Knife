@@ -1,33 +1,37 @@
 import pandas as pd
 import chardet
 
-countries ={'Argentina': ['Argentina'],
-            'Australia': ['Australia'],
-            'Brazil':    ['Brazil','Brasil'],
-            'Canada':    ['Canada'],
-            'China':     ['China'],
-            'Croatia':   ['Croatia'],
-            'Cuba':      ['Cuba'],
-            'Chile':     ['Chile'],
-            'Colombia':  ['Colombia'],
-            'Denmark':   ['Denmark'],
-            'Ecuador':   ['Ecuador'],
-            'Germany':   ['Germany'],
-            'Indonesia': ['Indonesia'],
-            'India':     ['India'],
-            'Iran':      ['Iran'],
-            'Italy':     ['Italy'],
-            'Mexico':    ['Mexico', 'México'],
-            'Netherlands':['Netherlands', 'Holanda'],
-            'Paraguay':  ['Paraguay'],
-            'Peru':      ['Peru', 'Perú'],
-            'Poland':    ['Poland'],
-            'Portugal':  ['Portugal'],
-            'Serbia':    ['Serbia'],
-            'Spain':     ['Spain','España'],
-            'Ukraine':   ['Ukraine'],
-            'Uruguay':   ['Uruguay'],
-            'USA':       ['USA']}
+countries ={'Argentina':    ['Argentina'],
+            'Australia':    ['Australia'],
+            'Brazil':       ['Brazil','Brasil'],
+            'Canada':       ['Canada'],
+            'China':        ['China'],
+            'Croatia':      ['Croatia'],
+            'Cuba':         ['Cuba'],
+            'Chile':        ['Chile'],
+            'Colombia':     ['Colombia'],
+            'Costa Rica':   ['Costa Rica'],
+            'Denmark':      ['Denmark'],
+            'Ecuador':      ['Ecuador'],
+            'El Salvador':  ['El Salvador'],
+            'Germany':      ['Germany'],
+            'Indonesia':    ['Indonesia'],
+            'India':        ['India'],
+            'Iran':         ['Iran'],
+            'Italy':        ['Italy'],
+            'Mexico':       ['Mexico', 'México'],
+            'Netherlands':  ['Netherlands', 'Holanda'],
+            'Paraguay':     ['Paraguay'],
+            'Peru':         ['Peru', 'Perú'],
+            'Poland':       ['Poland'],
+            'Portugal':     ['Portugal'],
+            'Saudi Arabia': ['Saudi Arabia'],
+            'Serbia':       ['Serbia'],
+            'Spain':        ['Spain','España'],
+            'Ukraine':      ['Ukraine'],
+            'United Kingdom': ['United Kingdom', 'UK'],
+            'Uruguay':      ['Uruguay'],
+            'USA':          ['USA', 'Estados Unidos', 'United States'] }
 
 def verify_country(country):
     for canonical_name in countries:
@@ -35,7 +39,7 @@ def verify_country(country):
             if alias==country:
                 return canonical_name
     print(country, ' not in datbase' )
-    return 'bad country'
+    return 'No country available'
 
 def scielo_wos_info():
     info_string ='''
@@ -347,8 +351,8 @@ def get_scielo_dicts(df):
         # Take care of institutions
         for institution in institution_list:
             if institution not in institutions:
-                country = institution.split(' ')[-1].strip(' ')
-                country=verify_country(country)
+                country = institution.split(',')[-1].strip(' ')
+                country = verify_country(country)
                 institutions[institution]=\
                     {'papers':[id],
                     'country':country}
