@@ -172,7 +172,7 @@ def ingest_wos_scielo_file(file_name):
 
     rawdata = open (file_name,"rb").read()
     encoding = chardet.detect(rawdata)['encoding']
-
+    print('Encoding: ', encoding)
     df = pd.read_csv(file_name,
                      encoding=encoding,
                      index_col=False,
@@ -250,9 +250,17 @@ def get_addresses(alpha):
         (people, place) = pair
         place = place.strip('; ')
         people = people.split('; ')
+        people = [item.replace('.', ' ').strip(' ').replace('  ',' ') \
+                         for item in people]
         for author in people:
             addresses[author]=place
     return addresses
+
+def get_author_list(author_str):
+    author_list = author_str.split('; ')
+    author_list = [item.replace('.',' ').strip(' ').replace('  ',' ') \
+                    for item in author_list]
+    return author_list
 
 def get_scielo_dicts(df):
     authors = {}
@@ -268,7 +276,7 @@ def get_scielo_dicts(df):
         language = row['language']
         english_author_keywords = \
                 get_english_author_keywords(row['english author keywords'])
-        authors_list = row['authors'].split('; ')
+        authors_list = get_author_list(row['authors'])
         year = int(row['pub year'])
         addresses = get_addresses(row['addresses'])
         institution_list = list(set(list(addresses.values())))
