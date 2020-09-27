@@ -1,42 +1,85 @@
 import pandas as pd
 import chardet
+import pathlib
 
-countries ={'Argentina':    ['Argentina'],
+countries ={'Angola':       ['Angola'],
+            'Argentina':    ['Argentina'],
             'Australia':    ['Australia'],
-            'Brazil':       ['Brazil','Brasil'],
-            'Canada':       ['Canada'],
-            'China':        ['China'],
+            'Austria':      ['Austria'],
+            'Barbados':     ['Barbados', 'BARBADOS'],
+            'Belgium':      ['Belgium','Bélgica'],
+            'Bolivia':      ['Bolivia'],
+            'Brazil':       ['Brazil','Brasil','BRAZIL'],
+            'Bulgaria':     ['Bulgaria'],
+            'Canada':       ['Canada','CANADA','Canadá'],
+            'China':        ['China','PEOPLES R CHINA','PEOPLES R CHINA',
+                                "People's Republic of China"],
+            'Colombia':     ['Colombia'],
             'Croatia':      ['Croatia'],
             'Cuba':         ['Cuba'],
             'Chile':        ['Chile'],
             'Colombia':     ['Colombia'],
             'Costa Rica':   ['Costa Rica'],
             'Denmark':      ['Denmark'],
+            'Dominican Republic': ['Dominican Republic', 'República Dominicana'],
             'Ecuador':      ['Ecuador'],
             'El Salvador':  ['El Salvador'],
-            'Germany':      ['Germany'],
+            'Finland':      ['Finland'],
+            'France':       ['France','Francia'],
+            'Germany':      ['Germany','Alemania','Deutschland'],
+            'Greece':       ['Greece'],
+            'Guatemala':    ['Guatemala'],
+            'Guyana':       ['Guyana', 'GUYANA'],
+            'Hong Kong':    ['Hong Kong'],
+            'Honduras':     ['Honduras'],
             'Indonesia':    ['Indonesia'],
             'India':        ['India'],
             'Iran':         ['Iran'],
-            'Italy':        ['Italy'],
+            'Iraq':         ['Iraq'],
+            'Italy':        ['Italy','ITALY','Itália','Italia'],
+            'Jamaica':      ['Jamaica'],
+            'Japan':        ['Japan', 'JAPAN','Japón'],
+            'Lithuania':    ['Lithuania'],
+            'Macedonia':    ['Macedonia'],
+            'Mali':         ['Mali'],
             'Mexico':       ['Mexico', 'México'],
+            'Mozambique':   ['Mozambique'],
             'Netherlands':  ['Netherlands', 'Holanda'],
-            'Paraguay':     ['Paraguay'],
+            'New Zealand':  ['New Zealand', 'Nueva Zelanda'],
+            'Nicaragua':    ['Nicaragua'],
+            'Nigeria':      ['Nigeria'],
+            'Norway':       ['Norway', 'Noruega'],
+            'Paraguay':     ['Paraguay','Paraguai'],
             'Peru':         ['Peru', 'Perú'],
             'Poland':       ['Poland'],
             'Portugal':     ['Portugal'],
+            'Puerto Rico':  ['Puerto Rico'],
+            'Russia':       ['Russia', 'Rusia'],
             'Saudi Arabia': ['Saudi Arabia'],
             'Serbia':       ['Serbia'],
-            'Spain':        ['Spain','España'],
+            'Slovenia':     ['Slovenia'],
+            'South Africa': ['South Africa'],
+            'Sri Lanka':    ['Sri Lanka'],
+            'Spain':        ['Spain','España','Espanha'],
+            'Sweden':       ['Sweden'],
+            'Switzerland':  ['Switzerland'],
+            'Turkey':       ['Turkey'],
             'Ukraine':      ['Ukraine'],
-            'United Kingdom': ['United Kingdom', 'UK'],
+            'United Arab Emirates': ['United Arab Emirates','U Arab Emirates'],
+            'United Kingdom': ['United Kingdom', 'UK', 'ENGLAND','Inglaterra'],
             'Uruguay':      ['Uruguay'],
-            'USA':          ['USA', 'Estados Unidos', 'United States'] }
+            'USA':          ['USA', 'Estados Unidos', 'United States','EE.UU',
+                             'United States of América','EE. UU',
+                             'United States of America',
+                             'Estados Unidos de América'],
+            'Venezuela':    ['Venezuela','República Bolivariana de Venezuela'],
+            'Vietnam':      ['Vietnam'] }
 
 def verify_country(country):
+    country=country.strip('.')
     for canonical_name in countries:
         for alias in countries[canonical_name]:
-            if alias==country:
+            if alias.lower()==country.lower():
                 return canonical_name
     print(country, ' not in datbase' )
     return 'No country available'
@@ -208,11 +251,24 @@ def scielo_wos_info():
     print(info_string)
     return
 
-def ingest_wos_scielo_file(file_name):
+def ingest_wos_scielo_folder():
+    encoding = 'unknown'
+    cwd = pathlib.Path.cwd()
+    data_folder= cwd/'data'
 
-    rawdata = open (file_name,"rb").read()
-    encoding = chardet.detect(rawdata)['encoding']
-    print('Encoding: ', encoding)
+    df_list = []
+    for data_file in data_folder.glob('*.txt'):
+        if encoding == 'unknown':
+            rawdata = open (data_file,"rb").read()
+            encoding = chardet.detect(rawdata)['encoding']
+            print('Encoding: ', encoding)
+        df_list.append(ingest_wos_scielo_file(data_file, encoding))
+    df = pd.concat(df_list)
+
+    return df
+
+def ingest_wos_scielo_file(file_name, encoding):
+
     df = pd.read_csv(file_name,
                      encoding=encoding,
                      index_col=False,
@@ -287,6 +343,9 @@ def get_addresses(alpha):
 
     # Clean up each group and assign info to dict
     for pair in groups:
+        if len(pair)!=2:
+            print('FAULTY FORMAT: ', pair)
+            return addresses
         (people, place) = pair
         place = place.strip('; ')
         people = people.split('; ')
