@@ -75,16 +75,31 @@ countries ={'Angola':       ['Angola'],
             'Venezuela':    ['Venezuela','República Bolivariana de Venezuela'],
             'Vietnam':      ['Vietnam'] }
 
-def verify_country(country):
+def get_valid_country(country):
+    '''
+    Returns a valid country alias
+
+    Input:
+        country: string with the country as mentioned in the institution string
+    Returns:
+        canonical_name: a valid country canonical name or 'not in database'
+                        if country could not be matched against the countries
+                        dict
+    '''
     country=country.strip('.')
     for canonical_name in countries:
         for alias in countries[canonical_name]:
             if alias.lower()==country.lower():
                 return canonical_name
-    print(country, ' not in datbase' )
+    print(country, 'not in datbase' )
     return 'No country available'
 
 def scielo_wos_info():
+    '''
+
+    prints information about the two letter field codes in scielo
+
+    '''
     info_string ='''
     https://images.webofknowledge.com/images/help/WOK/hs_selo_fieldtags.html
     SciELO Citation Index Field Tags
@@ -268,8 +283,6 @@ def ingest_wos_scielo_folder( data_folder = pathlib.Path.cwd()/'data' ):
         print(f'Data folder {str(data_folder)} does not exist!')
         return
 
-
-
     encoding = 'unknown'
 
     df_list = []
@@ -284,7 +297,15 @@ def ingest_wos_scielo_folder( data_folder = pathlib.Path.cwd()/'data' ):
     return df
 
 def ingest_wos_scielo_file(file_name, encoding):
+    '''
+    Ingest an individual data file with data from scielo
+        Input:
+            file_name: valid name of the file to be ingested
+            encoding: file encoding
 
+        Returns:
+            df: pandas data frame with the data in the ingested file
+    '''
     df = pd.read_csv(file_name,
                      encoding=encoding,
                      index_col=False,
@@ -340,6 +361,13 @@ def ingest_wos_scielo_file(file_name, encoding):
     return df
 
 def get_english_author_keywords(keyword_string):
+    '''
+    Returns a list of english author keywords
+        Input:
+            keyword_string: string with keyword information
+        Returns:
+            list of keywords
+    '''
     if keyword_string!=keyword_string:
         return []
     english_author_keywords = keyword_string.split('; ')
@@ -427,7 +455,7 @@ def get_scielo_dicts(df):
         for institution in institution_list:
             if institution not in institutions:
                 country = institution.split(',')[-1].strip(' ')
-                country = verify_country(country)
+                country = get_valid_country(country)
                 institutions[institution]=\
                     {'papers':[id],
                     'country':country}
