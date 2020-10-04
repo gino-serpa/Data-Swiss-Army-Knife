@@ -251,10 +251,26 @@ def scielo_wos_info():
     print(info_string)
     return
 
-def ingest_wos_scielo_folder():
+def ingest_wos_scielo_folder( data_folder = pathlib.Path.cwd()/'data' ):
+    '''
+    Ingests the scielo files in data_folder and returns a single dataframe
+    with all the records
+
+    Input:
+        data_folder: Folder containing all the data files.
+                     Defaults to 'data' in the current working directory
+    Returns:
+        df: Pandas dataframe with all the records
+    '''
+
+    # Check if folder exist and if there is data in the folder
+    if not data_folder.exists():
+        print(f'Data folder {str(data_folder)} does not exist!')
+        return
+
+
+
     encoding = 'unknown'
-    cwd = pathlib.Path.cwd()
-    data_folder= cwd/'data'
 
     df_list = []
     for data_file in data_folder.glob('*.txt'):
