@@ -432,7 +432,7 @@ def get_scielo_dicts(df):
                'year': year,
                'spanish title': spanish_title,
                'portuguese title': portuguese_title,
-               'othe language title': other_language_title,
+               'other language title': other_language_title,
                'source': source,
                'language': language,
                'english author keywords':english_author_keywords,
@@ -463,3 +463,18 @@ def get_scielo_dicts(df):
                 institutions[institution]['papers'].append(id)
     print(counter)
     return authors, papers, institutions
+
+def get_country_papers_count(papers, institutions):
+    country_papers_count = {}
+    for paper in papers:
+        countries_in_paper=[]
+        for institution in papers[paper]['institutions']:
+            country =institutions[institution]['country']
+            if country not in countries_in_paper:
+                countries_in_paper.append(country)
+        for country in countries_in_paper:
+            if country not in country_papers_count:
+                country_papers_count[country]=1
+            else:
+                country_papers_count[country]+=1
+    return country_papers_count
