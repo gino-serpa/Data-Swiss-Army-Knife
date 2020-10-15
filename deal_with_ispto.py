@@ -7,8 +7,10 @@ curl -X GET --header 'Accept: application/json' 'https://developer.uspto.gov/ibd
 '''
 import json
 import gzip
-
+import requests
+'''
 with gzip.open('output2',"rb") as f:
     d=json.loads(f.read().decode("ascii"))
 
 print(d)
+'''
