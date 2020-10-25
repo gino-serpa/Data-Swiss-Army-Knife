@@ -1,6 +1,11 @@
 import pandas as pd
 import chardet
 import pathlib
+import logging
+
+logging.basicConfig(filename='ingestion.log',
+                    level=logging.DEBUG)
+
 
 countries ={'Angola':       ['Angola'],
             'Argentina':    ['Argentina'],
@@ -91,7 +96,7 @@ def get_valid_country(country):
         for alias in countries[canonical_name]:
             if alias.lower()==country.lower():
                 return canonical_name
-    print(country, 'not in datbase' )
+    logging.debug(country+' not in datbase' )
     return 'No country available'
 
 def scielo_wos_info():
