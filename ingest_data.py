@@ -393,7 +393,7 @@ def get_addresses(alpha):
     # Clean up each group and assign info to dict
     for pair in groups:
         if len(pair)!=2:
-            print('FAULTY FORMAT: ', pair)
+            logging.debug('FAULTY FORMAT: ', pair)
             return addresses
         (people, place) = pair
         place = place.strip('; ')
@@ -440,8 +440,7 @@ def get_scielo_dicts(df):
                'other language title': other_language_title,
                'source': source,
                'language': language,
-               'english author keywords':english_author_keywords,
-               'institutions':institution_list
+               'english author keywords':english_author_keywords
                     }
 
         # Take care of the authors dict
@@ -457,15 +456,19 @@ def get_scielo_dicts(df):
                 authors[author]['institutions'].append(institution)
 
         # Take care of institutions
+        institution_names_list=[]
         for institution in institution_list:
-            if institution not in institutions:
+            institution_name = institution.split(',')[0].strip(' ')
+            institution_names_list.append(institution_name)
+            if institution_name not in institutions:
                 country = institution.split(',')[-1].strip(' ')
                 country = get_valid_country(country)
-                institutions[institution]=\
+                institutions[institution_name]=\
                     {'papers':[id],
                     'country':country}
             else:
-                institutions[institution]['papers'].append(id)
+                institutions[institution_name]['papers'].append(id)
+        papers[id]['institutions']=institution_names_list
     print(counter)
     return authors, papers, institutions
 
